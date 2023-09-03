@@ -1,3 +1,4 @@
+# 2023 osmiumsilver osmiumsilver
 $scoopPath = (Get-Command scoop).Source | Split-Path -Parent | Split-Path -Parent
 
 # # Get the list of updated apps Run the scoop update command and capture its output

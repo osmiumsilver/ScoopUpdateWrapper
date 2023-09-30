@@ -14,7 +14,7 @@ $scoopPath = (Get-Command scoop).Source | Split-Path -Parent | Split-Path -Paren
 scoop update * 6>&1 | Tee-Object -Variable output
 
 # Define a regular expression pattern to match the app name, old version, and new version
-$pattern = "Updating '(.+?)' \((.+?) -> (.+?)\)"
+$pattern = "Updating '(.+?)' \((\d+(?:\.\d+){1,3}) -> (\d+(?:\.\d+){1,3})\)"
 
 # Create an array to store the results
 $results = @() 

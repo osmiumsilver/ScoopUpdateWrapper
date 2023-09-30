@@ -64,14 +64,13 @@ foreach ($app in $results) {
 
                 # Update the existing rule with the new app path and set the remote address to LocalSubnet
                 $FirewallRule   | Set-NetFirewallRule -Program $newFilePath -RemoteAddress LocalSubnet
-            } else {
+            } 
+        } else {
 
-                # Create a new rule for the app using the executable name as the rule name
-                New-NetFirewallRule -DisplayName $app.AppName -Program $appPath -Action Allow
-            }
+            # Create a new rule for the app using the executable name as the rule name
+            New-NetFirewallRule -DisplayName $app.AppName -Program $appPath -Action Allow
         }
     }
 
 }
-
 

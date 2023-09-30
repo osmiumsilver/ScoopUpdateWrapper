@@ -1,8 +1,17 @@
+ # Self-elevate the script if required
+if (-Not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] 'Administrator')) {
+ if ([int](Get-CimInstance -Class Win32_OperatingSystem | Select-Object -ExpandProperty BuildNumber) -ge 6000) {
+  $CommandLine = "-File `"" + $MyInvocation.MyCommand.Path + "`" " + $MyInvocation.UnboundArguments
+  Start-Process -FilePath PowerShell.exe -Verb Runas -ArgumentList $CommandLine
+  Exit
+ }
+} 
+
 # 2023 osmiumsilver osmiumsilver
 $scoopPath = (Get-Command scoop).Source | Split-Path -Parent | Split-Path -Parent
 
 # # Get the list of updated apps Run the scoop update command and capture its output
-$output = scoop update * | Out-String
+scoop update * 6>&1 | Tee-Object -Variable output
 
 # Define a regular expression pattern to match the app name, old version, and new version
 $pattern = "Updating '(.+?)' \((.+?) -> (.+?)\)"
@@ -55,8 +64,7 @@ foreach ($app in $results) {
 
                 # Update the existing rule with the new app path and set the remote address to LocalSubnet
                 $FirewallRule   | Set-NetFirewallRule -Program $newFilePath -RemoteAddress LocalSubnet
-            }
-            else {
+            } else {
 
                 # Create a new rule for the app using the executable name as the rule name
                 New-NetFirewallRule -DisplayName $app.AppName -Program $appPath -Action Allow

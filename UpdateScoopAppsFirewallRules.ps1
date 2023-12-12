@@ -1,76 +1,63 @@
- # Self-elevate the script if required
-if (-Not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] 'Administrator')) {
- if ([int](Get-CimInstance -Class Win32_OperatingSystem | Select-Object -ExpandProperty BuildNumber) -ge 6000) {
-  $CommandLine = "-File `"" + $MyInvocation.MyCommand.Path + "`" " + $MyInvocation.UnboundArguments
-  Start-Process -FilePath PowerShell.exe -Verb Runas -ArgumentList $CommandLine
-  Exit
- }
-} 
-
-# 2023 osmiumsilver osmiumsilver
+ # 2023 osmiumsilver osmiumsilver v1.2
 $scoopPath = (Get-Command scoop).Source | Split-Path -Parent | Split-Path -Parent
+ try {
+    # Update scoop buckets
+    scoop update
+ }
+  catch {
+    Write-Error "Failed to update buckets : $($_.Exception.Message)"
+  }
 
-# # Get the list of updated apps Run the scoop update command and capture its output
-scoop update * 6>&1 | Tee-Object -Variable output
-
-# Define a regular expression pattern to match the app name, old version, and new version
-$pattern = "Updating '(.+?)' \((\d+(?:\.\d+){1,3}) -> (\d+(?:\.\d+){1,3})\)"
 
 # Create an array to store the results
-$results = @() 
+$results = @(scoop status)
 
-
-# Use the -match operator to find all matches in the output
-$output -split "`n" | ForEach-Object {
-    if ($_ -match $pattern) {
-        # Create a custom object to store the app name, old version, and new version
-        $result = New-Object PSObject -Property @{
-            AppName    = $Matches[1]
-            OldVersion = $Matches[2]
-            NewVersion = $Matches[3]
-        }
-
-        # Add the result to the array
-        $results += $result
-    }
-}
 
 
 # Update the firewall rules for each updated app
 foreach ($app in $results) {
 
-
-    # Step 3: Get a list of installed Scoop apps
+try {
+Write-Host "Updating" $app.Name
+    sudo scoop update $app.Name
+        # Step 3: Get a list of installed Scoop apps
     # $installedApps = Get-ChildItem -Directory -Path "$scoopPath\apps" | Select-Object -ExpandProperty Name
-    Write-Host "Applying firewall rules for updated $app..."
     # Get the path of the updated app
-    $appRootPath = scoop prefix $app.AppName | Split-Path -Parent
-    $appRootPath = $appRootPath + "\*"
+   Write-Warning "Updating firewall rules for $app"
 
 
-    # Get the firewall rule for the app based on its path
-    $existingAppPathFilterRules = Get-NetFirewallApplicationFilter | Where-Object { $_.Program -like $appRootPath }
 
-    foreach ($rule in $existingAppPathFilterRules) {
-        
-        if ($rule.Program -match $app.OldVersion) {
-         
-            #Concat filePATH with new path with new version
-            $newFilePath = [regex]::Replace($rule.Program, "\d+\.\d+\.\d+", $app.NewVersion)
 
-            $FirewallRules = $existingAppPathFilterRules | Get-NetFirewallRule
+      # Update firewall rules for the app
+      $appRootPath = scoop prefix $app.Name | Split-Path -Parent
+      $appRootPath = "$appRootPath\*"
 
-            foreach ($FirewallRule in $FirewallRules) {
+   $existingAppPathFilterRules = sudo {Get-NetFirewallApplicationFilter} |  Where-Object { $_.Program -like $appRootPath}
+      foreach ($rule in $existingAppPathFilterRules) {
+        # if ($rule.Program -match "^$appRootPath(\d+\.\d+\.\d+)$") {
+          if ($rule.Program -match $app."Installed Version"){
+            echo  $app."Installed Version"
+          # Concat filePATH with new path with new version
+          $newFilePath = [regex]::Replace($rule.Program, "\d+\.\d+\.\d+", $app."Latest Version")
 
-                # Update the existing rule with the new app path and set the remote address to LocalSubnet
-                $FirewallRule   | Set-NetFirewallRule -Program $newFilePath -RemoteAddress LocalSubnet
-            } 
-        } else {
+          # Update the existing rule with the new app path and set the remote address to LocalSubnet
+        $FirewallRules = $existingAppPathFilterRules | sudo {$input | Get-NetFirewallRule}
 
-            # Create a new rule for the app using the executable name as the rule name
-            New-NetFirewallRule -DisplayName $app.AppName -Program $appPath -Action Allow
+          foreach ($FirewallRule in $FirewallRules) {
+      $FirewallRule | sudo {$input | Set-NetFirewallRule -Program $args[0] -RemoteAddress LocalSubnet} -args $newFilePath
+          }
         }
-    }
+        else {
+
+                # Create a new rule for the app using the executable name as the rule name
+                New-NetFirewallRule -DisplayName $app.Name -Program $appPath -Action Allow
+            }
+      }
 
 }
 
+catch{
+
+Failed to update app : $($_.Exception.Message)
+}
+}

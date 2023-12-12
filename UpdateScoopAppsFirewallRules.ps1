@@ -38,7 +38,7 @@ Write-Host "Updating" $app.Name
           if ($rule.Program -match $app."Installed Version"){
             echo  $app."Installed Version"
           # Concat filePATH with new path with new version
-          $newFilePath = [regex]::Replace($rule.Program, "\d+\.\d+\.\d+", $app."Latest Version")
+          $newFilePath = [regex]::Replace($rule.Program, "\d+(\.\d+)*", $app."Latest Version")
 
           # Update the existing rule with the new app path and set the remote address to LocalSubnet
         $FirewallRules = $existingAppPathFilterRules | sudo {$input | Get-NetFirewallRule}

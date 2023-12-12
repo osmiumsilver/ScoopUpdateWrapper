@@ -42,9 +42,17 @@ Write-Host "Updating" $app.Name
 
           # Update the existing rule with the new app path and set the remote address to LocalSubnet
         $FirewallRules = $existingAppPathFilterRules | sudo {$input | Get-NetFirewallRule}
-
+ 
           foreach ($FirewallRule in $FirewallRules) {
+           $originalRemoteAddress = $FirewallRule | gsudo { $input |Get-NetFirewallAddressFilter}  | Select-Object -ExpandProperty RemoteAddress
+           if ($originalRemoteAddress -eq 'LocalSubnet') {
+          
+          
+          
       $FirewallRule | sudo {$input | Set-NetFirewallRule -Program $args[0] -RemoteAddress LocalSubnet} -args $newFilePath
+      }
+      
+      else{  $FirewallRule | sudo {$input | Set-NetFirewallRule -Program $args[0]} -args $newFilePath}
           }
         }
         else {

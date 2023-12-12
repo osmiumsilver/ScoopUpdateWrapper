@@ -66,6 +66,6 @@ Write-Host "Updating" $app.Name
 
 catch{
 
-Failed to update app : $($_.Exception.Message)
+echo "Failed to update app : $($_.Exception.Message)"
 }
 }

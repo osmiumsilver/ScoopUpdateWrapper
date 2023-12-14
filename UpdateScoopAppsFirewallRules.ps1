@@ -30,6 +30,8 @@ foreach ($app in $results) {
     $appRootPath = "$appRootPath\*"
   
     $existingAppPathFilterRules = sudo { Get-NetFirewallApplicationFilter } |  Where-Object { $_.Program -like $appRootPath }
+    if  ($existingAppPathFilterRules)
+    {
     foreach ($rule in $existingAppPathFilterRules) {
       if ($rule.Program -match $app."Installed Version") {
         Write-Output ("Detected " + $app.Name + " Version " + $app."Installed Version" + " , Changing... to " + $app."Latest Version")
@@ -57,11 +59,15 @@ foreach ($app in $results) {
       
        
       }
-      
+      else{
+        Write-Host ("There is no firewall rules for this version " + $app.'Installed Version' +" for "+ $app.Name)
+      }
     }
-
+    }
+    else {
+      Write-Warning ("THERE IS ABSOLUTELY NO Firewall rules for " + $app.Name)
+    }
   }
-
   catch {
     Write-Output "Failed to update app : $($_.Exception.Message)"
     continue

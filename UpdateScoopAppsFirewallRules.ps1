@@ -17,6 +17,7 @@ foreach ($app in $results) {
     $output = gsudo scoop update $app.Name
     # Sadly, the error that scoop 'throws' is not done by 'Write-Error' so it cannot be caught :(
     if ($output -match "^ERROR") {
+      Write-Output $output
       throw "The app cannot be updated"
     }
     Write-Warning "Updating firewall rules for $app"
@@ -27,7 +28,7 @@ foreach ($app in $results) {
     if ($existingAppPathFilterRules) {
       foreach ($rule in $existingAppPathFilterRules) {
         if ($rule.Program -match $app."Installed Version") {
-          Write-Output ("Detected " + $app.Name + " Version " + $app."Installed Version" + " , Changing... to " + $app."Latest Version")
+          Write-Output ("Detected " + $app.Name + " Version " + $app."Installed Version" + " , Changing to " + $app."Latest Version" +" ...")
           # Update the existing rule with the new app path and set the remote address to LocalSubnet
           $newFilePath = [regex]::Replace($rule.Program, "\d+(\.\d+)*", $app."Latest Version")
           $FirewallRule = $rule | sudo { $input | Get-NetFirewallRule }
@@ -35,11 +36,12 @@ foreach ($app in $results) {
           try {
             if ($originalRemoteAddress -eq 'LocalSubnet') {
               $FirewallRule | sudo { $input | Set-NetFirewallRule -Program $args[0] -RemoteAddress LocalSubnet } -args $newFilePath
-              Write-Host ("Success!!")
             }
             else { 
               $FirewallRule | sudo { $input | Set-NetFirewallRule -Program $args[0] } -args $newFilePath 
+              
             }
+            Write-Host ("Success!!")
           }
           catch {
             Write-Host ("Changing firewall rule for " + $app.Name + " goes wrong!")

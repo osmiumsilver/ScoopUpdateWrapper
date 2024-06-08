@@ -5,7 +5,7 @@ function UpdateApps($app) {
   $updateResult = Update($app)
   if ($updateResult -eq 0) {
     Write-Host "$($app.Name) update success. Updating firewall rules..." -ForegroundColor Green
-    ApplyFirewall(${app.Name})
+    ApplyFirewall($($app.Name))
   }
   else {
     Write-Error "Update is failed for $($app.Name), no firewall rules are changed."

@@ -62,7 +62,7 @@ function ApplyFirewall {
      param (
         [string]$appName,
         [string]$installedVersion,
-        [string]$lasestVersion 
+        [string]$latestVersion 
     )
     $appRootPath = scoop prefix $appName | Split-Path -Parent
     $appRootPath = "$appRootPath\*"

@@ -21,14 +21,12 @@ This script initially addressed the need for automatically updating Windows fire
    ```
 3. **Run the project**:
    ```powershell
-   .\ScoopUpdateWrapper.ps1
+   .\wrapper.ps1
    ```
 
 ## Parameters
 
 - `-V`: Verbose Mode. Output more detailed information during its execution for troubleshooting.
-  
-- `-M`: Manual Mode. Use it when you want to manually invoke the functions. This mode would Store some variables within the PowerShell session for debugging and testing functionalities.
 
 - `-S`: Bypass the `scoop update` process to Skip Scoop Manifest Update. However, be cautious when using this option, as it may break the script if you haven't recently run `scoop update` to update the app manifest. Scoop attempts to automatically update the manifest before updating the app, and skipping this step may lead to issues.
 

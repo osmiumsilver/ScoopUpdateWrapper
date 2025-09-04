@@ -32,7 +32,7 @@ if ($Verbose) {
 $ScriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 # 使用点 sourcing 加载类定义文件
-. "$ScriptRoot/Modules/common.ps1"
+. "$ScriptRoot/modules/common.ps1"
 . "$ScriptRoot/modules/scoop-manager.ps1"
 . "$ScriptRoot/modules/firewall-manager.ps1"
 . "$ScriptRoot/modules/utility.ps1"

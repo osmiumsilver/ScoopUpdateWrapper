@@ -1,57 +1,35 @@
-
-# wrapper.ps1
-
-<#
-.SYNOPSIS
-    Scoop Update Wrapper
-.DESCRIPTION
-    This PowerShell script updates scoop apps and modifies corresponding firewall rules.
-.LINK
-    https://github.com/osmiumsilver/ScoopUpdateWrapper
-.NOTES
-    Author: osmiumsilver | License: GNU GPLv3
-    $ManifestPath = Join-Path $PSScriptRoot "wrapper.psd1"
-    $Version = (Test-ModuleManifest -Path $ManifestPath).Version
-    "Version: $Version"
-#>
-
-#Requires -Version 5.1
-
-param(
-    [Parameter()]
-    [Alias("S")]
-    [switch]$SkipScoopUpdate,
-    [Parameter()]
-    [Alias("V")]
-    [switch]$Verbose
-)
-
-if ($Verbose) {
-    $DebugPreference = 'Continue'
-}
-$ScriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-
 # 使用点 sourcing 加载类定义文件
-. "$ScriptRoot/Modules/common.ps1"
-. "$ScriptRoot/modules/scoop-manager.ps1"
-. "$ScriptRoot/modules/firewall-manager.ps1"
-. "$ScriptRoot/modules/utility.ps1"
+. "$PSScriptRoot/classes/scoop-scope.ps1"
+. "$PSScriptRoot/classes/firewall-rule.ps1"
+. "$PSScriptRoot/classes/scoop-app.ps1"
+. "$PSScriptRoot/modules/utility.ps1"
+. "$PSScriptRoot/modules/scoop-manager.ps1"
+. "$PSScriptRoot/modules/firewall-manager.ps1"
+
 
 Write-Debug "Verbose: SkipScoopUpdate=$SkipScoopUpdate"
 
-[PrivilegeDemotion]::EnsureNotAdmin()
+function Invoke-ScoopUpdater {
+    [CmdletBinding(SupportsShouldProcess = $true)]
+    param(
+        [Parameter()]
+        [Alias("S")]
+        [switch]$SkipScoopUpdate
+    )
+    Write-Debug "Verbose: SkipScoopUpdate=$SkipScoopUpdate" # 用 Write-Debug 替换
+    [PrivilegeDemotion]::EnsureNotAdmin()
 
     if (!$SkipScoopUpdate) {
         Write-Host "Updating Scoop..." -ForegroundColor Cyan
         $output = scoop update *>&1
         if ($LASTEXITCODE -ne 0) {
-        # 如果失败了，把捕获到的所有输出作为错误信息展示出来
-        Write-Error "Scoop update failed. Full output below:`n$($output | Out-String)"
-        exit 1
+            # 如果失败了，把捕获到的所有输出作为错误信息展示出来
+            Write-Error "Scoop update failed. Full output below:`n$($output | Out-String)"
+            exit 1
+        }
     }
-    }
-    else{
-         Write-Warning "You seem to be using the -S parameter to skip the scoop manifest update, which may break the script if you haven't used "“scoop update"” to update the app manifest recently, since scoop takes it upon itself to try to automatically update the manifest before updating the app."
+    else {
+        Write-Warning "You seem to be using the -S parameter to skip the scoop manifest update, which may break the script if you haven't used "“scoop update"” to update the app manifest recently, since scoop takes it upon itself to try to automatically update the manifest before updating the app."
     }
     # scoop status outputs PSObject, so we can work with it directly
     $status = scoop status -l
@@ -73,17 +51,16 @@ Write-Debug "Verbose: SkipScoopUpdate=$SkipScoopUpdate"
         return
     }
     $updateResults = @{
-    Succeeded = [System.Collections.Generic.List[string]]::new()
-    Failed    = [System.Collections.Generic.List[string]]::new()
+        Succeeded = [System.Collections.Generic.List[string]]::new()
+        Failed    = [System.Collections.Generic.List[string]]::new()
     }
         
     $status | ForEach-Object {
-            
+    
         $appName = $_.Name
         # $oldVersion = $_."Install Version"
         $newVersion = $_."Latest Version"
-       
-                
+        
         try {
             $app = [ScoopManager]::GetAppInfo($appName)
             [ScoopManager]::UpdateApp($app)
@@ -107,3 +84,6 @@ Write-Debug "Verbose: SkipScoopUpdate=$SkipScoopUpdate"
         Write-Host "`nFailed:" -ForegroundColor Red
         $updateResults.Failed | ForEach-Object { Write-Host "- $_" -ForegroundColor Green }
     }
+}
+
+Export-ModuleMember -Function Invoke-ScoopUpdater

@@ -2,9 +2,10 @@
 $ModulesPath = Join-Path -Path $PSScriptRoot -ChildPath 'modules'
 # 使用点 sourcing 加载类定义文件
 . "$ModulesPath/common.ps1"
+. "$ModulesPath/utility.ps1"
 . "$ModulesPath/scoop-manager.ps1"
 . "$ModulesPath/firewall-manager.ps1"
-. "$ModulesPath/utility.ps1"
+
 
 Write-Debug "Verbose: SkipScoopUpdate=$SkipScoopUpdate"
 

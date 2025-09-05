@@ -1,5 +1,8 @@
+using module './common.ps1'
+using module './utility.ps1'
+
 class ScoopManager {
-    # WIP
+    
     # static [System.Collections.Generic.List[ScoopApp]] GetAllInstalledApps() {
     #     Write-Debug "Getting all installed apps"
     #     $apps = [System.Collections.Generic.List[ScoopApp]]::new()
@@ -59,16 +62,17 @@ class ScoopManager {
         $appName = $app.Name
         Write-Debug "Checking installations for app: $appName"
         $userPath = [PathManager]::GetAppPath([ScoopScope]::User,$appName,"User")
-        [AppManager]::_FillAppScopeInfo($app, $userPath)
+        [ScoopManager]::_FillAppScopeInfo($app, $userPath)
         $globalPath = [PathManager]::GetAppPath([ScoopScope]::Global,$appName,"Global")
-        [AppManager]::_FillAppScopeInfo($app, $globalPath)
-        }
+        [ScoopManager]::_FillAppScopeInfo($app, $globalPath)
+        return $app
+    }
 
 
     static [ScoopApp] GetAppInfo([string]$appName) {
         # input appName, output ScoopApp object
         Write-Debug "Getting app info for: $appName"        
-        return [AppManager]::_CheckInstallations([ScoopApp]::new($appName))
+        return [ScoopManager]::_CheckInstallations([ScoopApp]::new($appName))
     }
 
     static [void] UpdateApp([ScoopApp]$app) {

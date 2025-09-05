@@ -1,8 +1,8 @@
 # 使用点 sourcing 加载类定义文件
 . "$PSScriptRoot/classes/scoop-scope.ps1"
 . "$PSScriptRoot/classes/firewall-rule.ps1"
-. "$PSScriptRoot/classes/scoop-app.ps1"
 . "$PSScriptRoot/modules/utility.ps1"
+. "$PSScriptRoot/classes/scoop-app.ps1"
 . "$PSScriptRoot/modules/scoop-manager.ps1"
 . "$PSScriptRoot/modules/firewall-manager.ps1"
 

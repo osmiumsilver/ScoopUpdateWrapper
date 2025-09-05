@@ -16,6 +16,18 @@ function Invoke-ScoopUpdater {
         [Alias("S")]
         [switch]$SkipScoopUpdate
     )
+
+    if (-not (Test-IsWindows)) {
+        # 使用 throw 会产生一个终止性错误，立即停止函数执行。
+        # 这是合适的，因为脚本在非 Windows 系统上无法运行。
+        throw "This script is designed to run only on Windows operating systems."
+    }
+
+    # 2. 检查 Scoop 是否安装
+    if (-not (Test-ScoopInstallation)) {
+        throw "Scoop is not installed or not found in your PATH. Please install Scoop first: https://scoop.sh"
+    }
+    
     Write-Debug "Verbose: SkipScoopUpdate=$SkipScoopUpdate" # 用 Write-Debug 替换
     [PrivilegeDemotion]::EnsureNotAdmin()
 

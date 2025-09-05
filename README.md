@@ -23,7 +23,7 @@ This script initially addressed the need for automatically updating Windows fire
    Invoke-ScoopUpdater
    ```
    
-   Or invoke the function with params:
+   or invoke the function with params:
    ```powershell
    Invoke-ScoopUpdater -SkipScoopUpdate -Verbose
    ```
@@ -31,14 +31,14 @@ This script initially addressed the need for automatically updating Windows fire
 
 ## Additional Parameters
 
-- `-S`: Bypass the `scoop update` process to Skip Scoop Manifest Update. However, be cautious when using this option, as it may break the script if you haven't recently run `scoop update` to update the app manifest. Scoop attempts to automatically update the manifest before updating the app, and skipping this step may lead to issues.
+- `-S` or `-SkipScoopUpdate`: Bypass the `scoop update` process to Skip Scoop Manifest Update. However, be cautious when using this option, as it may break the script if you haven't recently run `scoop update` to update the app manifest. Scoop attempts to automatically update the manifest before updating the app, and skipping this step may lead to issues.
 
 
 ## Development History
 This project was initially hosted on this [Gist](https://gist.github.com/osmiumsilver/4707fb236dca64e13a793da70532a668), where early versions were developed. The project has since migrated here to better facilitate versioning, enhancements, and community contributions. You can view the original version history there. 
 
 ## Notes
-Use the script at your own risk!
+This project is still beta! So there might be some state-mismatch issues where firewall rules gets messy. ⚠️ Use the script at your own risk!
 
 ## Contributing
 Contributions are welcome! Feel free to submit a PR or open an issue. Feedback and suggestions are greatly appreciated.

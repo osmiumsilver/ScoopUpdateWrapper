@@ -1,15 +1,13 @@
-
-$ModulesPath = Join-Path -Path $PSScriptRoot -ChildPath 'modules'
 # 使用点 sourcing 加载类定义文件
-. "$ModulesPath/common.ps1"
-. "$ModulesPath/utility.ps1"
-. "$ModulesPath/scoop-manager.ps1"
-. "$ModulesPath/firewall-manager.ps1"
+. "$PSScriptRoot/classes/scoop-scope.ps1"
+. "$PSScriptRoot/classes/firewall-rule.ps1"
+. "$PSScriptRoot/classes/scoop-app.ps1"
+. "$PSScriptRoot/modules/utility.ps1"
+. "$PSScriptRoot/modules/scoop-manager.ps1"
+. "$PSScriptRoot/modules/firewall-manager.ps1"
 
 
 Write-Debug "Verbose: SkipScoopUpdate=$SkipScoopUpdate"
-
-
 
 function Invoke-ScoopUpdater {
     [CmdletBinding(SupportsShouldProcess = $true)]
@@ -58,12 +56,11 @@ function Invoke-ScoopUpdater {
     }
         
     $status | ForEach-Object {
-            
+    
         $appName = $_.Name
         # $oldVersion = $_."Install Version"
         $newVersion = $_."Latest Version"
-       
-                
+        
         try {
             $app = [ScoopManager]::GetAppInfo($appName)
             [ScoopManager]::UpdateApp($app)

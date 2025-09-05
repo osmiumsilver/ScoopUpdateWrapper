@@ -1,0 +1,4 @@
+enum ScoopScope {
+    User
+    Global
+}

@@ -1,5 +1,5 @@
 using namespace System.Security.Principal
-using module "./common.ps1"
+using module "../classes/scoop-scope.ps1"
 class PathManager {
     static [string]$UserScoopPath
     static [string]$GlobalScoopPath
